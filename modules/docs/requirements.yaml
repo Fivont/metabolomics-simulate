@@ -1,0 +1,332 @@
+id: REQ-ROOT
+name: 人体代谢与调控系统
+functional_description: >
+  描述人体在稳态条件下，对营养物质、内源/外源化合物进行代谢、转化、
+  合成、分泌以及通过激素-神经-免疫信号进行整体调控的功能需求体系。
+scenarios: []
+children:
+
+  # =========================
+  # 环境模块（全局）
+  # =========================
+  - id: ENV-1
+    name: 代谢环境模块
+    functional_description: >
+      提供统一的代谢物池、能量状态、激素水平、离子浓度和环境参数，
+      所有功能模块仅可从此模块读取输入，并将输出写回。
+    feature_description:
+      inputs:
+        metabolites:
+          - 葡萄糖
+          - 糖原
+          - 脂肪酸
+          - 甘油
+          - 氨基酸
+          - 氨
+          - 尿素
+          - 胆固醇
+          - 胆汁酸
+          - ATP / ADP / AMP
+          - NADH / NAD+ / FADH2
+          - 酮体
+        signals:
+          - 胰岛素
+          - 胰高血糖素
+          - 肾上腺素
+          - 皮质醇
+          - 甲状腺激素
+          - 炎症因子
+        parameters:
+          - 氧分压
+          - pH
+          - 温度
+          - 渗透压
+      outputs:
+        description: 所有代谢模块的产物和信号均回写至本模块
+    scenarios: []
+
+  # =========================
+  # 顶层模块 1：营养代谢
+  # =========================
+  - id: REQ-1
+    name: 营养代谢
+    functional_description: >
+      对摄入或储存的碳水化合物、脂类和氨基酸进行分解、合成和相互转化，
+      以满足机体能量供应和物质合成需求。
+    children:
+
+      # -------- 碳水代谢 --------
+      - id: REQ-1-1
+        name: 碳水化合物代谢
+        functional_description: >
+          调节葡萄糖的利用、储存和生成，维持血糖稳态。
+        children:
+
+          - id: REQ-1-1-1
+            name: 糖原合成
+            functional_description: >
+              在能量充足状态下，将葡萄糖转化为糖原进行储存。
+            feature_description:
+              inputs:
+                metabolites: [葡萄糖, ATP]
+                signals: [胰岛素]
+              outputs:
+                metabolites: [糖原, ADP]
+            control_conditions:
+              - 胰岛素水平升高
+              - 细胞ATP充足
+              - 血糖浓度升高
+
+          - id: REQ-1-1-2
+            name: 糖原分解
+            functional_description: >
+              在血糖降低或能量需求增加时分解糖原生成葡萄糖。
+            feature_description:
+              inputs:
+                metabolites: [糖原]
+                signals: [胰高血糖素, 肾上腺素]
+              outputs:
+                metabolites: [葡萄糖]
+            control_conditions:
+              - 胰高血糖素升高
+              - 应激状态
+              - 血糖降低
+
+          - id: REQ-1-1-3
+            name: 糖异生
+            functional_description: >
+              以非糖前体合成葡萄糖，用于长期禁食或高能耗状态。
+            feature_description:
+              inputs:
+                metabolites: [乳酸, 甘油, 生糖氨基酸, ATP]
+                signals: [胰高血糖素, 皮质醇]
+              outputs:
+                metabolites: [葡萄糖, ADP]
+            control_conditions:
+              - 长时间禁食
+              - 胰岛素水平低
+              - ATP供应充足
+
+      # -------- 脂代谢 --------
+      - id: REQ-1-2
+        name: 脂类代谢
+        functional_description: >
+          调节脂肪酸和脂类的合成、分解及跨组织转运。
+        children:
+
+          - id: REQ-1-2-1
+            name: 脂肪酸合成
+            functional_description: >
+              在能量和碳源充足时合成脂肪酸用于储能。
+            feature_description:
+              inputs:
+                metabolites: [乙酰辅酶A, NADPH, ATP]
+                signals: [胰岛素]
+              outputs:
+                metabolites: [脂肪酸, ADP, NADP+]
+            control_conditions:
+              - 高碳水摄入
+              - 胰岛素升高
+
+          - id: REQ-1-2-2
+            name: 脂肪酸分解（β-氧化）
+            functional_description: >
+              将脂肪酸分解以生成能量。
+            feature_description:
+              inputs:
+                metabolites: [脂肪酸, NAD+, FAD]
+                signals: [胰高血糖素]
+              outputs:
+                metabolites: [乙酰辅酶A, NADH, FADH2]
+            control_conditions:
+              - 能量需求增加
+              - 胰岛素低
+
+          - id: REQ-1-2-3
+            name: 脂类转运
+            functional_description: >
+              通过脂蛋白在组织间转运脂类。
+            feature_description:
+              inputs:
+                metabolites: [脂肪酸, 甘油, 脂蛋白]
+              outputs:
+                metabolites: [组织脂质储存]
+            control_conditions:
+              - 餐后状态
+              - 血脂水平变化
+
+      # -------- 氨基酸代谢 --------
+      - id: REQ-1-3
+        name: 氨基酸代谢
+        functional_description: >
+          对氨基酸进行分解、再合成及转运。
+        children:
+
+          - id: REQ-1-3-1
+            name: 氨基酸分解
+            functional_description: >
+              分解氨基酸用于供能或转化。
+            feature_description:
+              inputs:
+                metabolites: [氨基酸]
+              outputs:
+                metabolites: [氨, 碳骨架]
+            control_conditions:
+              - 蛋白质摄入过量
+              - 能量不足
+
+          - id: REQ-1-3-2
+            name: 氨基酸合成与转运
+            functional_description: >
+              合成非必需氨基酸并在组织间转运。
+            feature_description:
+              inputs:
+                metabolites: [碳骨架, 氨]
+              outputs:
+                metabolites: [氨基酸]
+            control_conditions:
+              - 生长或修复需求
+
+      # -------- 能量供应 --------
+      - id: REQ-1-4
+        name: 能量供应与稳态
+        functional_description: >
+          通过多种代谢路径维持ATP供应及内环境稳定。
+        children:
+
+          - id: REQ-1-4-1
+            name: 有氧呼吸与ATP生成
+            feature_description:
+              inputs:
+                metabolites: [葡萄糖, 脂肪酸, 氧]
+              outputs:
+                metabolites: [ATP, CO2, H2O]
+            control_conditions:
+              - 氧充足
+
+          - id: REQ-1-4-2
+            name: 酮体生成
+            feature_description:
+              inputs:
+                metabolites: [乙酰辅酶A]
+              outputs:
+                metabolites: [酮体]
+            control_conditions:
+              - 长期饥饿
+              - 糖供应不足
+
+  # =========================
+  # 顶层模块 2：解毒
+  # =========================
+  - id: REQ-2
+    name: 解毒（生物转化）
+    functional_description: >
+      将内源或外源有毒物质转化为可排泄的无毒形式。
+    children:
+
+      - id: REQ-2-1
+        name: 氧化还原反应
+        feature_description:
+          inputs:
+            metabolites: [药物, NADPH, 氧]
+          outputs:
+            metabolites: [中间代谢物]
+        control_conditions:
+          - CYP450酶激活
+
+      - id: REQ-2-2
+        name: 结合反应
+        feature_description:
+          inputs:
+            metabolites: [中间代谢物, 葡萄糖醛酸, 硫酸根]
+          outputs:
+            metabolites: [可排泄物]
+        control_conditions:
+          - 前体充足
+
+  # =========================
+  # 顶层模块 3：合成与分泌
+  # =========================
+  - id: REQ-3
+    name: 合成与分泌
+    children:
+
+      - id: REQ-3-1
+        name: 胆汁酸合成与分泌
+        feature_description:
+          inputs:
+            metabolites: [胆固醇]
+          outputs:
+            metabolites: [胆汁酸]
+        control_conditions:
+          - 脂类消化需求
+
+      - id: REQ-3-2
+        name: 血浆蛋白合成
+        feature_description:
+          inputs:
+            metabolites: [氨基酸]
+          outputs:
+            metabolites: [白蛋白等血浆蛋白]
+        control_conditions:
+          - 营养充足
+
+      - id: REQ-3-3
+        name: 凝血因子合成
+        feature_description:
+          inputs:
+            metabolites: [氨基酸, 维生素K]
+          outputs:
+            metabolites: [凝血因子]
+        control_conditions:
+          - 损伤或凝血信号
+
+  # =========================
+  # 顶层模块 4：氮处理与尿素循环
+  # =========================
+  - id: REQ-4
+    name: 氮处理与尿素循环
+    functional_description: >
+      将有毒氨转化为尿素排出体外。
+    children:
+
+      - id: REQ-4-1
+        name: 尿素循环
+        feature_description:
+          inputs:
+            metabolites: [氨, CO2, ATP]
+          outputs:
+            metabolites: [尿素, ADP]
+        control_conditions:
+          - 氨浓度升高
+
+  # =========================
+  # 顶层模块 5：激素-神经-免疫调控
+  # =========================
+  - id: REQ-5
+    name: 激素-神经-免疫信号调控
+    children:
+
+      - id: REQ-5-1
+        name: 激素信号接收与转导
+        feature_description:
+          inputs:
+            signals: [胰岛素, 胰高血糖素]
+          outputs:
+            effects: [代谢通路激活或抑制]
+
+      - id: REQ-5-2
+        name: 神经信号整合
+        feature_description:
+          inputs:
+            signals: [交感/副交感神经信号]
+          outputs:
+            effects: [代谢速率调节]
+
+      - id: REQ-5-3
+        name: 免疫信号交互
+        feature_description:
+          inputs:
+            signals: [炎症因子]
+          outputs:
+            effects: [代谢重编程]
