@@ -1,0 +1,181 @@
+test_suite:
+  name: Train_24H_Metabolic_Cycle
+  description: >
+    详细的24小时一日三餐代谢全流程模拟，包含从清晨唤醒到夜间睡眠的连续状态变化。
+    基于 train_cases.md 的描述。
+
+  test_cases:
+    - id: TC-TRAIN-PHASE-01
+      scenario: 07:00 - 08:00 (Morning Fasting / Waking)
+      time_window:
+        start: 07:00
+        end: 08:00
+      initial_state:
+        time_since_last_meal: > 10h
+        status: Overnight Fasting
+      expected_changes:
+        metabolites:
+          glucose: maintain_baseline_4.0_5.5
+          liver_glycogen: low_and_decreasing
+          muscle_glycogen: stable
+          triglycerides: low_in_blood
+          free_fatty_acids: slight_increase
+          ATP: normal_maintained_by_fat_oxidation
+        signals:
+          insulin: low_baseline
+          glucagon: high_relative
+      rationale: >
+        隔夜空腹状态，依靠肝糖原分解和轻度脂解维持血糖和能量。
+
+    - id: TC-TRAIN-PHASE-02
+      scenario: 08:00 (Breakfast Input)
+      time_window:
+        start: 08:00
+        end: 08:05
+      input_events:
+        - type: meal
+          content:
+            carbohydrate: moderate
+            protein: moderate
+            fat: moderate
+      expected_changes:
+        metabolites:
+          glucose_input: rapid_influx
+          amino_acids_input: rapid_influx
+          chylomicrons: rapid_influx
+      rationale: >
+        早餐摄入，营养物质迅速进入血液。
+
+    - id: TC-TRAIN-PHASE-03
+      scenario: 08:00 - 10:00 (Breakfast Post-prandial / Absorptive)
+      time_window:
+        start: 08:00
+        end: 10:00
+      expected_changes:
+        metabolites:
+          glucose: rapid_rise_peak_then_fall
+          liver_glycogen: stop_decay_start_synthesis
+          muscle_glycogen: start_synthesis
+          triglycerides: increase_via_lipogenesis
+          free_fatty_acids: decrease_suppressed
+          lactate: slight_increase_glycolysis
+          ATP: maintained_by_glycolysis_TCA
+        signals:
+          insulin: rapid_rise_peak
+          glucagon: suppressed_decrease
+      rationale: >
+        吸收期，胰岛素主导，促进合成代谢（糖原合成、脂生成），抑制分解代谢。
+
+    - id: TC-TRAIN-PHASE-04
+      scenario: 10:00 - 12:00 (Breakfast Post-absorptive / Early Fasting)
+      time_window:
+        start: 10:00
+        end: 12:00
+      expected_changes:
+        metabolites:
+          glucose: return_to_baseline
+          liver_glycogen: synthesis_stops_slight_decay_if_needed
+          free_fatty_acids: gradual_recovery
+        signals:
+          insulin: return_to_baseline
+          glucagon: gradual_rise
+      rationale: >
+        餐后过渡期，血糖回归基线，合成代谢减弱，逐渐转为利用内源储备。
+
+    - id: TC-TRAIN-PHASE-05
+      scenario: 12:00 (Lunch Input)
+      time_window:
+        start: 12:00
+        end: 12:05
+      input_events:
+        - type: meal
+          content:
+            carbohydrate: high
+            protein: high
+            fat: high
+      rationale: >
+        午餐摄入，通常热量高于早餐。
+
+    - id: TC-TRAIN-PHASE-06
+      scenario: 12:00 - 15:00 (Lunch Post-prandial)
+      time_window:
+        start: 12:00
+        end: 15:00
+      expected_changes:
+        metabolites:
+          glucose: significant_rise_peak_fall
+          liver_glycogen: strong_synthesis
+          muscle_glycogen: strong_synthesis
+          triglycerides: active_storage
+          amino_acids: uptake_protein_synthesis
+        signals:
+          insulin: high_peak
+          glucagon: strongly_suppressed
+      rationale: >
+        午餐吸收期，强烈的合成代谢反应。
+
+    - id: TC-TRAIN-PHASE-07
+      scenario: 15:00 - 18:00 (Afternoon Transition)
+      time_window:
+        start: 15:00
+        end: 18:00
+      expected_changes:
+        metabolites:
+          glucose: baseline
+          liver_glycogen: stable_or_slight_decay
+        signals:
+          insulin: baseline
+          glucagon: rising
+      rationale: >
+        下午过渡期，时间较长，逐渐进入早期空腹，肝糖原分解开始维持血糖。
+
+    - id: TC-TRAIN-PHASE-08
+      scenario: 18:00 (Dinner Input)
+      time_window:
+        start: 18:00
+        end: 18:05
+      input_events:
+        - type: meal
+          content:
+            carbohydrate: moderate
+            protein: moderate
+            fat: moderate
+      rationale: >
+        晚餐摄入。
+
+    - id: TC-TRAIN-PHASE-09
+      scenario: 18:00 - 22:00 (Dinner Post-prandial / Storage)
+      time_window:
+        start: 18:00
+        end: 22:00
+      expected_changes:
+        metabolites:
+          glucose: rise_and_return
+          liver_glycogen: reach_daily_peak
+          muscle_glycogen: reach_daily_peak
+          triglycerides: synthesis_from_excess_glucose
+        signals:
+          insulin: rise_and_return
+      rationale: >
+        晚餐后吸收与储存，糖原储备达到顶峰，多余能量转化为脂肪。
+
+    - id: TC-TRAIN-PHASE-10
+      scenario: 22:00 - 07:00 (Sleep / Overnight Fasting)
+      time_window:
+        start: 22:00
+        end: 31:00  # 07:00 next day
+      expected_changes:
+        metabolites:
+          glucose: maintained_by_endogenous
+          liver_glycogen: continuous_decay
+          free_fatty_acids: gradual_increase
+          glycerol: gradual_increase
+          ketone_bodies: slight_rise_late_stage
+          lactate: low_used_for_gluconeogenesis
+        signals:
+          insulin: drop_to_lowest_basal
+          glucagon: rise
+      rationale: >
+        睡眠期，长时间空腹。
+        阶段1 (22:00-02:00): 主要依靠肝糖原分解。
+        阶段2 (02:00-07:00): 糖异生贡献增加，脂解增强，酮体微升。

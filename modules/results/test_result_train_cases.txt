@@ -1,0 +1,50 @@
+
+=== Train Cases Verification Results ===
+Test Case: TC-TRAIN-PHASE-01
+  - glucose_baseline_check: FAIL
+  - insulin_low: FAIL
+  - glucagon_high: PASS
+  - glycogen_decreasing: PASS
+  => [FAILED]
+----------------------------------------
+Test Case: TC-TRAIN-PHASE-03
+  - glucose_peak_rise: PASS
+  - insulin_peak_high: PASS
+  - glycogen_increasing: FAIL
+  - triglycerides_increasing: PASS
+  - glucagon_suppressed: PASS
+  => [FAILED]
+----------------------------------------
+Test Case: TC-TRAIN-PHASE-04
+  - glucose_return_baseline: PASS
+  - insulin_dropping: PASS
+  - glucagon_rising: PASS
+  => [PASSED]
+----------------------------------------
+Test Case: TC-TRAIN-PHASE-06
+  - glucose_peak_rise: PASS
+  - glycogen_strong_synthesis: FAIL
+  - amino_acid_utilization: PASS
+  - insulin_peak_higher_than_fasting: PASS
+  => [FAILED]
+----------------------------------------
+Test Case: TC-TRAIN-PHASE-07
+  - glucose_stabilizing: PASS
+  - glucagon_rising_late: PASS
+  => [PASSED]
+----------------------------------------
+Test Case: TC-TRAIN-PHASE-09
+  - glycogen_peak_daily: FAIL
+  - triglycerides_storage: PASS
+  => [FAILED]
+----------------------------------------
+Test Case: TC-TRAIN-PHASE-10
+  - insulin_basal_low: PASS
+  - glucagon_high: PASS
+  - glycogen_decay: PASS
+  - fatty_acid_rise: PASS
+  - ketone_bodies_trend: PASS
+  => [PASSED]
+----------------------------------------
+
+Summary: 3/7 Test Cases Passed
