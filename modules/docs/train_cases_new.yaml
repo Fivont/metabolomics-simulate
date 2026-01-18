@@ -1,0 +1,205 @@
+test_suite:
+  name: Train_New_Detox_And_Signal
+  description: >
+    基于 code/train_cases_new.py 的新增测试，用于验证信号降解与典型解毒通路，
+    包括胰岛素降解动力学、乙醇代谢、胆红素葡萄糖醛酸结合以及相II结合反应的辅基消耗。
+
+  test_cases:
+    - id: TC-NEW-INSULIN-DEG
+      scenario: 胰岛素降解动力学对 IDE 活性变化的响应
+      time_window:
+        start: 00:00
+        end: 03:00
+      initial_state:
+        env_A_IDE: high (1.5)
+        env_B_IDE: low (0.2)
+        postprandial_hint: 00:20-00:50
+      expected_changes:
+        signals:
+          insulin:
+            comparative_at_~1.5h:
+              env_A_vs_env_B: lower_in_env_A
+              threshold_margin: >= 5%
+            decay_rate_over_window:
+              env_A_vs_env_B: faster_in_env_A
+              check: end_level_env_A < end_level_env_B
+          glucagon:
+            stability: baseline_range
+      visualization:
+        columns: [insulin, glucagon]
+        outputs: ["../results/curves_test_insulin_deg_fast.png", "../results/curves_test_insulin_deg_slow.png"]
+
+    - id: TC-NEW-ETHANOL
+      scenario: 乙醇代谢（ADH/ALDH → 乙酸）
+      time_window:
+        start: 00:00
+        end: 04:00
+      input_events:
+        - type: xenobiotic
+          content:
+            ethanol_minute_10: +5.0
+      expected_changes:
+        metabolites:
+          ethanol:
+            direction: decreasing
+            post_injection_window: 00:10-04:00
+            relative_drop: >= 50%_from_peak
+          acetaldehyde:
+            pattern: peak_then_decrease
+            peak_time_window: 00:20-01:30
+            peak_requirement: > 0.5
+          acetate:
+            direction: increasing
+            monotonicity: non_decreasing_after_00:20
+        cofactors:
+          nadh:
+            direction: increasing_during_oxidation
+            coupling: rises_when_ethanol_or_acetaldehyde_oxidized
+          nad_plus:
+            pattern: transient_consumption_then_recovery
+            relation: anti_correlated_with_nadh_generation
+      visualization:
+        columns: [ethanol, acetaldehyde, acetate, nadh, nad_plus]
+        outputs: ["../results/curves_test_ethanol.png"]
+
+    - id: TC-NEW-BILIRUBIN
+      scenario: 胆红素摄取与UGT结合生成直接胆红素
+      time_window:
+        start: 00:00
+        end: 03:00
+      initial_state:
+        indirect_bilirubin: 1.0
+        udpga: 5.0
+        liver_function: normal
+      expected_changes:
+        metabolites:
+          indirect_bilirubin:
+            direction: decreasing
+            constraint: end < start
+          direct_bilirubin:
+            direction: increasing
+            constraint: end > start
+          udpga:
+            direction: decreasing
+            usage: consumed_by_UGT
+      visualization:
+        columns: [indirect_bilirubin, direct_bilirubin, udpga]
+        outputs: ["../results/curves_test_bilirubin.png"]
+
+    - id: TC-NEW-PHASEII
+      scenario: 相II结合反应对辅基供给的依赖与消耗
+      time_window:
+        start: 00:00
+        end: 04:00
+      initial_state:
+        udpga: 6.0
+        paps: 3.0
+        gsh: 8.0
+      input_events:
+        - type: xenobiotic
+          content:
+            periodic_phase_I_feed: every_20min_until_120min(+0.8)
+      expected_changes:
+        metabolites:
+          phaseI_intermediates:
+            direction: decreasing
+            relation: declines_as_conjugation_progresses
+          conjugates:
+            direction: increasing
+            relation: accumulates_with_cofactors_available
+          udpga:
+            direction: decreasing
+            role: glucuronidation_donor
+          paps:
+            direction: decreasing
+            role: sulfation_donor
+          gsh:
+            direction: decreasing
+            role: gst_conjugation_donor
+      visualization:
+        columns: [phaseI_intermediates, conjugates, udpga, paps, gsh]
+        outputs: ["../results/curves_test_phaseII.png"]
+
+    - id: TC-CONSTRAINT-GLUCOSE
+      scenario: 糖代谢稳态与餐后峰值约束
+      time_window:
+        start: 00:00
+        end: 06:00
+      input_events:
+        - type: meal
+          content:
+            carbohydrate_at_00:20: moderate
+            carbohydrate_at_03:00: moderate
+      expected_changes:
+        metabolites:
+          glucose:
+            postprandial_peak_then_fall_within_~2h: true
+            fasting_phase_stable: true
+          ketone_body:
+            late_fasting_slight_rise: true
+        logic:
+          stop_gluconeogenesis_when_glucose_high: qualitative
+          start_glycogenolysis_or_gluconeogenesis_when_low: qualitative
+      visualization:
+        columns: [glucose, glycogen, ketone_body, insulin, glucagon]
+        outputs: ["../results/curves_constraint_glucose.png"]
+
+    - id: TC-CONSTRAINT-UREA
+      scenario: 氨升高时尿素生成与血氨控制
+      time_window:
+        start: 00:00
+        end: 04:00
+      input_events:
+        - type: nitrogen_load
+          content:
+            ammonia_bolus_at_00:10: +2.0
+            ammonia_bolus_at_00:40: +2.0
+      expected_changes:
+        metabolites:
+          urea:
+            increase_after_ammonia_load: true
+          ammonia:
+            peak_then_drop_back_toward_baseline: true
+        logic:
+          mass_balance_ammonia_to_urea: qualitative
+      visualization:
+        columns: [ammonia, urea, amino_acid]
+        outputs: ["../results/curves_constraint_urea.png"]
+
+    - id: TC-CONSTRAINT-ALBUMIN
+      scenario: 白蛋白合成维持在正常范围
+      time_window:
+        start: 00:00
+        end: 06:00
+      initial_state:
+        liver_function: normal
+      expected_changes:
+        metabolites:
+          albumin:
+            stays_within_approx_normal_range_35_55_g_per_L: true
+            shows_postprandial_support: true
+      visualization:
+        columns: [albumin, amino_acid, atp, insulin]
+        outputs: ["../results/curves_constraint_albumin.png"]
+
+    - id: TC-CONSTRAINT-LIPID
+      scenario: 脂代谢约束与储存逻辑
+      time_window:
+        start: 00:00
+        end: 06:00
+      input_events:
+        - type: lipid_load
+          content:
+            fatty_acid_bolus_at_00:20: +10.0
+            triglyceride_bolus_at_03:00: +8.0
+      expected_changes:
+        metabolites:
+          fatty_acid:
+            decreases_via_beta_oxidation_or_storage: true
+          triglycerides:
+            increases_but_not_unbounded: true
+        logic:
+          storage_vs_export_balance: qualitative
+      visualization:
+        columns: [fatty_acid, triglycerides, atp, insulin, glucagon]
+        outputs: ["../results/curves_constraint_lipid.png"]

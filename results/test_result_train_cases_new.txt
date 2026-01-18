@@ -1,0 +1,47 @@
+=== 新测试需求验证结果 ===
+Test Case: TC-NEW-INSULIN-DEG
+  - insulin_lower_with_high_IDE: FAIL
+  - faster_decay_with_high_IDE: FAIL
+  => [FAILED]
+----------------------------------------
+Test Case: TC-NEW-ETHANOL
+  - ethanol_decreasing: PASS
+  - acetaldehyde_peak: PASS
+  - acetate_increasing: PASS
+  => [PASSED]
+----------------------------------------
+Test Case: TC-NEW-BILIRUBIN
+  - indirect_bilirubin_decreasing: PASS
+  - direct_bilirubin_increasing: PASS
+  - udpga_consumed: PASS
+  => [PASSED]
+----------------------------------------
+Test Case: TC-NEW-PHASEII
+  - intermediates_decreasing: PASS
+  - conjugates_increasing: PASS
+  - cofactors_consumed: PASS
+  => [PASSED]
+----------------------------------------
+Test Case: TC-CONSTRAINT-GLUCOSE
+  - postprandial_peak_then_fall_within_~2h: PASS
+  - late_fasting_slight_rise_ketone: PASS
+  - fasting_phase_stable_glucose: PASS
+  => [PASSED]
+----------------------------------------
+Test Case: TC-CONSTRAINT-UREA
+  - urea_increase_after_ammonia: PASS
+  - ammonia_peak_then_drop: PASS
+  => [PASSED]
+----------------------------------------
+Test Case: TC-CONSTRAINT-ALBUMIN
+  - albumin_in_approx_35_55_range: PASS
+  - postprandial_support: PASS
+  => [PASSED]
+----------------------------------------
+Test Case: TC-CONSTRAINT-LIPID
+  - fatty_acid_decreases: PASS
+  - triglycerides_increase: PASS
+  - tg_not_unbounded: PASS
+  => [PASSED]
+----------------------------------------
+Summary: 7/8 Test Cases Passed

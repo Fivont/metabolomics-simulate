@@ -35,7 +35,13 @@ class MetabolicEnvironment:
             "arginine": 0.0,
             "ethanol": 0.0,
             "acetaldehyde": 0.0,
-            "acetate": 0.0
+            "acetate": 0.0,
+            "indirect_bilirubin": 0.2,
+            "direct_bilirubin": 0.0,
+            "udpga": 5.0,
+            "paps": 2.0,
+            "gsh": 10.0,
+            "napqi": 0.0
         }
         self.signals = {
             "insulin": 0.5,
@@ -343,9 +349,26 @@ def phaseII_Conjugation(ctx: Ctx) -> Dict[str, float]:
     inter = ctx.env.getMetabolite("phaseI_intermediates")
     liver_fn = ctx.env.getParameter("liver_function")
     conj = ctx.env.getMetabolite("conjugates")
-    rate = ctx.rate_modifier * inter * 0.1 * (liver_fn ** 2)
+    udpga = ctx.env.getMetabolite("udpga")
+    paps = ctx.env.getMetabolite("paps")
+    gsh = ctx.env.getMetabolite("gsh")
+    cof = max(0.0, min(udpga + paps + gsh, inter + 1.0))
+    rate = ctx.rate_modifier * inter * 0.1 * (liver_fn ** 2) * (0.5 + 0.5 * min(cof / 10.0, 1.0))
     clear = ctx.rate_modifier * conj * 0.05 * max(liver_fn - 0.5, 0.0)
-    return {"phaseI_intermediates": -rate, "conjugates": rate - clear}
+    return {
+        "phaseI_intermediates": -rate,
+        "conjugates": rate - clear,
+        "udpga": -rate * 0.2,
+        "paps": -rate * 0.1,
+        "gsh": -rate * 0.1,
+    }
+
+def bilirubinUGT(ctx: Ctx) -> Dict[str, float]:
+    ib = ctx.env.getMetabolite("indirect_bilirubin")
+    udpga = ctx.env.getMetabolite("udpga")
+    liver_fn = ctx.env.getParameter("liver_function")
+    rate = ctx.rate_modifier * min(ib, udpga * 0.5) * 0.05 * liver_fn
+    return {"indirect_bilirubin": -rate, "direct_bilirubin": rate, "udpga": -rate * 0.5}
 
 def ethanol_ADH(ctx: Ctx) -> Dict[str, float]:
     etoh = ctx.env.getMetabolite("ethanol")
@@ -510,8 +533,9 @@ def orchestrateDetoxification(ctx: Ctx) -> Dict[str, float]:
     o3 = ethanol_ADH(ctx)
     o4 = acetaldehyde_ALDH(ctx)
     o5 = acetate_to_acetylcoa(ctx)
+    o6 = bilirubinUGT(ctx)
     outputs = {}
-    for o in (o1, o2, o3, o4, o5):
+    for o in (o1, o2, o3, o4, o5, o6):
         for k, v in o.items():
             outputs[k] = outputs.get(k, 0.0) + v
     ctx.write(outputs)
@@ -529,6 +553,8 @@ def orchestrateSynthesisSecretion(ctx: Ctx) -> Dict[str, float]:
     return outputs
 
 def signalDegradationModule(ctx: Ctx) -> Dict[str, float]:
+    degradeInsulin(ctx)
+    degradeGlucagon(ctx)
     inactivateCatecholamines(ctx)
     return {}
 
@@ -577,7 +603,7 @@ def immuneSignalInteraction(ctx: Ctx) -> Dict[str, float]:
 def degradeInsulin(ctx: Ctx) -> Dict[str, float]:
     ide = ctx.env.getParameter("insulin_degrading_enzyme_activity")
     ins = ctx.env.getSignal("insulin")
-    ins = max(ins - 0.05 * ide, 0.0)
+    ins = max(ins - 0.5 * ide, 0.0)
     ctx.env.setSignal("insulin", ins)
     return {}
 

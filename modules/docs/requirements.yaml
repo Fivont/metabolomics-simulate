@@ -29,6 +29,11 @@ children:
           - ATP / ADP / AMP
           - NADH / NAD+ / FADH2
           - 酮体
+          - 间接胆红素
+          - 直接胆红素
+          - UDP-葡萄糖醛酸 (UDPGA)
+          - PAPS (3'-磷酸腺苷-5'-磷酸硫酸酯)
+          - 谷胱甘肽 (GSH)
         signals:
           - 胰岛素
           - 胰高血糖素
@@ -657,6 +662,98 @@ children:
             action: promote_reaction(Conjugation)
             mechanism: 辅基充足提高结合速率
             required_context: [cofactors_available == true]
+
+      # —— 细化：典型I相与II相实例（源自 knowledges.md） ——
+      - id: REQ-2-1-A
+        name: 乙醇氧化（ADH）
+        feature_description:
+          inputs:
+            metabolites:
+              - 乙醇
+              - NAD+
+            enzymes:
+              - 乙醇脱氢酶 (ADH)
+          outputs:
+            metabolites:
+              - 乙醛
+              - NADH
+        control_conditions:
+          - id: CC-REQ-2-1-A-01
+            condition: 肝功能正常
+            logic: env.parameters.liver_function >= threshold.normal
+            action: increase_rate(ADH_Oxidation)
+            mechanism: 肝细胞内ADH催化乙醇→乙醛
+            required_context: [NAD_plus_available == true]
+      - id: REQ-2-1-B
+        name: 乙醛氧化（ALDH）
+        feature_description:
+          inputs:
+            metabolites:
+              - 乙醛
+              - NAD+
+            enzymes:
+              - 醛脱氢酶 (ALDH)
+          outputs:
+            metabolites:
+              - 乙酸
+              - NADH
+        control_conditions:
+          - id: CC-REQ-2-1-B-01
+            condition: 肝功能正常
+            logic: env.parameters.liver_function >= threshold.normal
+            action: increase_rate(ALDH_Oxidation)
+            mechanism: 乙醛进一步氧化为乙酸
+            required_context: [NAD_plus_available == true]
+
+      - id: REQ-2-2-A
+        name: 胆红素摄取与葡萄糖醛酸结合（UGT）
+        functional_description: >
+          将间接胆红素摄入肝细胞并结合为直接胆红素，以利排泄。
+        feature_description:
+          inputs:
+            metabolites:
+              - 间接胆红素
+              - UDP-葡萄糖醛酸 (UDPGA)
+            transporters:
+              - OATP1B1/1B3
+            enzymes:
+              - UGT1A1
+          compartment: [肝细胞, 光面内质网]
+          outputs:
+            metabolites:
+              - 直接胆红素（胆红素二葡萄糖醛酸）
+          notes: 直接胆红素更水溶，可经胆汁排泄
+        control_conditions:
+          - id: CC-REQ-2-2-A-01
+            condition: UDPGA充足
+            logic: env.metabolites.UDPGA > threshold.sufficient
+            action: upregulate_enzyme(UGT1A1)
+            mechanism: 辅酶供给充足时结合速率提升
+            required_context: [transporters_functional == true]
+
+      - id: REQ-2-2-B
+        name: NAPQI 谷胱甘肽结合（GST）
+        functional_description: >
+          将对乙酰氨基酚相I生成的NAPQI与GSH结合以解毒。
+        feature_description:
+          inputs:
+            metabolites:
+              - NAPQI
+              - 谷胱甘肽 (GSH)
+            enzymes:
+              - 谷胱甘肽 S-转移酶 (GST)
+          outputs:
+            metabolites:
+              - NAPQI-GSH 结合物
+          effects:
+            - 降低NAPQI反应性，防止肝细胞损伤
+        control_conditions:
+          - id: CC-REQ-2-2-B-01
+            condition: GSH充足
+            logic: env.metabolites.GSH > threshold.sufficient
+            action: promote_reaction(GST_Conjugation)
+            mechanism: GSH耗竭将降低解毒能力
+            required_context: [phase_I_active == true]
 
   # =========================
   # 顶层模块 3：合成与分泌
