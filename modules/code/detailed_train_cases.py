@@ -42,6 +42,38 @@ def _plot(df: pd.DataFrame, columns: List[str], title: str, outfile: str) -> Non
     plt.close()
 
 
+def _plot_no_scale(df: pd.DataFrame, columns: List[str], title: str, outfile: str) -> None:
+    try:
+        plt.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans', 'Arial']
+    except:
+        pass
+    plt.rcParams['axes.unicode_minus'] = False
+    
+    plt.figure(figsize=(12, 7))
+    available = [c for c in columns if c in df.columns]
+    cmap = plt.get_cmap("tab20")
+    
+    for i, col in enumerate(available):
+        val = df[col]
+        # 去除归一化逻辑，直接绘制原始数值 val
+        plt.plot(df["time"], val, label=col, linewidth=2, color=cmap(i % cmap.N))
+        
+    plt.xlabel("时间 (小时)")
+    # 修改 Y 轴标签，去掉“归一化”字样
+    plt.ylabel("浓度/水平")
+    plt.title(title)
+    
+    if len(available) > 0:
+        plt.legend(loc="best", fontsize=9, ncol=2)
+        
+    outdir = os.path.dirname(outfile) or "."
+    os.makedirs(outdir, exist_ok=True)
+    
+    plt.tight_layout()
+    plt.savefig(outfile, bbox_inches="tight")
+    plt.close()
+
+
 def test_insulin_degradation_detailed() -> Dict[str, float]:
     env_fast = MetabolicEnvironment()
     env_fast.setParameter("insulin_degrading_enzyme_activity", 3.0)
@@ -58,8 +90,8 @@ def test_insulin_degradation_detailed() -> Dict[str, float]:
     df_fast = _run(env_fast, minutes=180, inject=inject)
     df_slow = _run(env_slow, minutes=180, inject=inject)
 
-    _plot(df_fast, ["insulin", "glucagon"], "胰岛素降解（高IDE）", "../results/curves_detailed_insulin_deg_fast.png")
-    _plot(df_slow, ["insulin", "glucagon"], "胰岛素降解（低IDE）", "../results/curves_detailed_insulin_deg_slow.png")
+    _plot(df_fast, ["insulin", "glucagon"], "胰岛素降解（高IDE）", "../results-new/curves_detailed_insulin_deg_fast.png")
+    _plot(df_slow, ["insulin", "glucagon"], "胰岛素降解（低IDE）", "../results-new/curves_detailed_insulin_deg_slow.png")
 
     # 指标：同一时刻胰岛素更低，且下降更快
     t_idx_mid = df_fast["time"].sub(1.0).abs().idxmin()
@@ -100,7 +132,7 @@ def test_ethanol_detox_detailed() -> Dict[str, float]:
             env.setMetabolite("ethanol", env.getMetabolite("ethanol") + 5.0)
 
     df = _run(env, minutes=240, inject=inject)
-    _plot(df, ["ethanol", "acetaldehyde", "acetate", "nadh", "nad_plus"], "乙醇代谢曲线", "../results/curves_detailed_ethanol.png")
+    _plot(df, ["ethanol", "acetaldehyde", "acetate", "nadh", "nad_plus"], "乙醇代谢曲线", "../results-new/curves_detailed_ethanol.png")
     
     # 原有指标：乙醇下降，乙醛先升后降，乙酸上升
     ethanol_drop = float(df["ethanol"].iloc[-1] < df["ethanol"].max() * 0.5)
@@ -141,7 +173,7 @@ def test_bilirubin_conjugation_detailed() -> Dict[str, float]:
         pass
 
     df = _run(env, minutes=180, inject=inject)
-    _plot(df, ["indirect_bilirubin", "direct_bilirubin", "udpga"], "胆红素结合曲线", "../results/curves_detailed_bilirubin.png")
+    _plot(df, ["indirect_bilirubin", "direct_bilirubin", "udpga"], "胆红素结合曲线", "../results-new/curves_detailed_bilirubin.png")
     
     # 原有指标：间接胆红素下降、直接胆红素增加、UDPGA消耗
     ib_drop = float(df["indirect_bilirubin"].iloc[-1] < df["indirect_bilirubin"].iloc[0])
@@ -183,7 +215,7 @@ def test_phaseII_conjugation_with_cofactors_detailed() -> Dict[str, float]:
             env.setParameter("xenobiotic_load", env.getParameter("xenobiotic_load") + 0.8)
 
     df = _run(env, minutes=240, inject=inject)
-    _plot(df, ["phaseI_intermediates", "conjugates", "udpga", "paps", "gsh"], "相II结合与辅基消耗", "../results/curves_detailed_phaseII.png")
+    _plot(df, ["phaseI_intermediates", "conjugates", "udpga", "paps", "gsh"], "相II结合与辅基消耗", "../results-new/curves_detailed_phaseII.png")
     
     # 原有指标：中间体下降、结合产物上升、辅基下降
     inter_drop = float(df["phaseI_intermediates"].iloc[-1] < df["phaseI_intermediates"].max() * 0.7)
@@ -233,7 +265,7 @@ def test_glucose_homeostasis_constraints_detailed() -> Dict[str, float]:
             env.setParameter("is_postprandial", False)
 
     df = _run(env, minutes=360, inject=inject)
-    _plot(df, ["glucose", "glycogen", "ketone_body", "insulin", "glucagon"], "糖代谢稳态", "../results/curves_detailed_constraint_glucose.png")
+    _plot(df, ["glucose", "glycogen", "ketone_body", "insulin", "glucagon"], "糖代谢稳态", "../results-new/curves_detailed_constraint_glucose.png")
     
     # 原有指标：峰值后2小时内回落（相对行为判断）
     p1 = df[(df["time"] >= 0.5) & (df["time"] < 1.5)]
@@ -275,7 +307,7 @@ def test_urea_cycle_constraints_detailed() -> Dict[str, float]:
             env.setMetabolite("ammonia", env.getMetabolite("ammonia") + 2.0)
 
     df = _run(env, minutes=240, inject=inject)
-    _plot(df, ["ammonia", "urea", "amino_acid"], "尿素循环约束", "../results/curves_detailed_constraint_urea.png")
+    _plot(df, ["ammonia", "urea", "amino_acid"], "尿素循环约束", "../results-new/curves_detailed_constraint_urea.png")
     
     # 原有指标：加氨后尿素上升、氨回落
     post_peak = df[df["time"] > 0.2]
@@ -311,7 +343,7 @@ def test_albumin_constraints_detailed() -> Dict[str, float]:
             env.setParameter("is_postprandial", False)
 
     df = _run(env, minutes=360, inject=inject)
-    _plot(df, ["albumin", "amino_acid", "atp", "insulin"], "白蛋白约束", "../results/curves_detailed_constraint_albumin.png")
+    _plot(df, ["albumin", "amino_acid", "atp", "insulin"], "白蛋白约束", "../results-new/curves_detailed_constraint_albumin.png")
     
     # 原有指标：白蛋白在正常范围内，餐后支持
     alb_min = df["albumin"].min()
@@ -351,7 +383,7 @@ def test_lipid_constraints_detailed() -> Dict[str, float]:
         env.setParameter("is_postprandial", 20 <= t < 80 or 180 <= t < 240)
 
     df = _run(env, minutes=360, inject=inject)
-    _plot(df, ["fatty_acid", "triglycerides", "atp", "insulin", "glucagon"], "脂代谢约束", "../results/curves_detailed_constraint_lipid.png")
+    _plot(df, ["fatty_acid", "triglycerides", "atp", "insulin", "glucagon"], "脂代谢约束", "../results-new/curves_detailed_constraint_lipid.png")
     
     # 原有指标：脂肪酸下降，甘油三酯上升，甘油三酯不无限增加
     # 直接检查脂肪酸的最终值是否小于其最大值，这样只要脂肪酸在某个时间点达到峰值后有所下降，就算通过
@@ -414,8 +446,8 @@ def summarize_and_plot_detailed() -> str:
             passed += 1
     summary.append(f"Summary: {passed}/{total} Test Cases Passed")
     out_txt = "\n".join(summary)
-    os.makedirs("../results", exist_ok=True)
-    with open("../results/test_result_detailed_train_cases.txt", "w", encoding="utf-8") as f:
+    os.makedirs("../results-new", exist_ok=True)
+    with open("../results-new/test_result_detailed_train_cases.txt", "w", encoding="utf-8") as f:
         f.write(out_txt)
     return out_txt
 

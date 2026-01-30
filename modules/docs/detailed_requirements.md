@@ -129,27 +129,24 @@
 **4. 动力学与调控**: 
    - 反应机制: 有序双底物反应机制，先结合NADH/NAD+，再结合丙酮酸/乳酸
    - 速率方程: v = (Vmax_forward[Pyruvate][NADH] - Vmax_backward[Lactate][NAD+]) / (1 + [Pyruvate]Km_pyr + [NADH]Km_nadh + [Lactate]Km_lac + [NAD+]Km_nad + Ki(Oxamate)[Oxamate])
+   - 平衡常数 (Keq): 同工酶条件下相同，由底物/产物及细胞环境决定
    - 动力学参数 (LDHA, M亚基): 
      * Km(Pyruvate) ~0.5-1.0 mM
      * Km(NADH) ~0.01-0.05 mM
      * Km(Lactate) ~5-10 mM
      * Km(NAD+) ~0.1-0.5 mM
      * Vmax ~1000-2000 μmol/min/mg protein
-     * 平衡常数 (Keq): ~10^4 (倾向乳酸生成)
    - 动力学参数 (LDHB, H亚基): 
      * Km(Pyruvate) ~0.05-0.1 mM
      * Km(NADH) ~0.005-0.02 mM
      * Km(Lactate) ~0.5-1.0 mM
      * Km(NAD+) ~0.05-0.1 mM
      * Vmax ~500-1000 μmol/min/mg protein
-     * 平衡常数 (Keq): ~10^3 (倾向丙酮酸生成)
    - 抑制类型: 
      * Oxamate: 竞争性抑制剂 (与丙酮酸竞争结合位点)，Ki ~0.1-0.5 mM
      * 草酰乙酸: 竞争性抑制剂 (与丙酮酸竞争结合位点)，Ki ~0.01-0.05 mM
      * 丙酮酸: 底物抑制 (高浓度抑制)，Ki ~5-10 mM
-   - 激活剂: 
-     * K+ (激活LDH活性)
-     * Mg2+ (激活LDH活性)
+   - 激活剂: 无特异性离子激活剂需求
    - 抑制剂: 
      * Oxamate (经典抑制剂)
      * 草酰乙酸 (代谢物抑制剂)
@@ -184,35 +181,35 @@
 #### 果糖代谢 (Fructose Metabolism)
 
 ##### 步骤 ID: GLY-15
-**1. 反应名称**: 果糖转运蛋白 (Fructose Transporter)
+**1. 反应名称**: 肝脏果糖摄取 (Hepatic Fructose Uptake)
 **2. 化学方程式**: Fructose(blood) ⇌ Fructose(cytosol)
-**3. 核心酶信息**: GLUT5 (SLC2A5), 果糖特异性转运蛋白，基因型: SLC2A5
+**3. 核心酶信息**: GLUT2 (SLC2A2)，肝细胞主要果糖/葡萄糖/半乳糖双向转运体；补充：小肠上皮细胞顶膜表达GLUT5 (SLC2A5) 专一性果糖转运
 **4. 动力学与调控**: 
    - 反应机制: 被动易化扩散，通过构象变化机制转运果糖
    - 速率方程: v = (Vmax_forward[Fructose]blood - Vmax_backward[Fructose]cytosol) / (1 + [Fructose]blood/Km_forward + [Fructose]cytosol/Km_backward)
    - 动力学参数: 
-     * Km_forward(Fructose) ~6-10 mM
-     * Km_backward(Fructose) ~6-10 mM
+     * Km_forward(Fructose) ~10-20 mM (GLUT2)
+     * Km_backward(Fructose) ~10-20 mM (GLUT2)
      * Vmax ~50-100 nmol/min/mg protein
    - 抑制类型: 无特异性抑制剂
-   - 激活剂: 果糖 (底物诱导表达)
-   - 抑制剂: 葡萄糖 (竞争性抑制，Ki ~20-30 mM)
-   - 膜定位: 基底膜 (Basolateral membrane)
+   - 激活剂: 底物诱导表达
+   - 膜定位: 基底膜 (Basolateral membrane, 肝细胞)
+   - 补充信息（GLUT5）: 顶膜定位（小肠）；对果糖高度特异，葡萄糖不被GLUT5识别；小分子抑制剂MSNBA；代谢类似物/竞争剂2,5-AM
 **5. 能量与热力学**: ΔG°' ≈ 0 kJ/mol (可逆)
-**6. 生理意义**: 肝脏摄取果糖进行代谢，是果糖代谢的主要场所
+**6. 生理意义**: 正常条件下肝脏主要通过GLUT2摄取果糖；GLUT5负责小肠对膳食果糖的吸收
 **7. 病理结局**: 
-   - GLUT5 缺陷: 果糖吸收不良
-   - GLUT5 过表达: 可能导致果糖过量摄取，增加脂肪肝风险
+   - 小肠GLUT5 缺陷: 果糖吸收不良
+   - 肝脏GLUT2 异常: 可能影响肝脏果糖摄取
 
 ##### 步骤 ID: GLY-16
 **1. 反应名称**: 果糖激酶 (Fructokinase)
 **2. 化学方程式**: 1.0 Fructose + 1.0 ATP → 1.0 Fructose-1-Phosphate + 1.0 ADP + 1.0 H+
-**3. 核心酶信息**: 果糖激酶 (KHK), EC 2.7.1.3, 肝脏特异性，基因型: KHK
+**3. 核心酶信息**: 果糖激酶 (KHK), EC 2.7.1.3，基因型: KHK；同工酶：KHK-C（肝脏/肾/肠道，高亲和力，低Km ~0.5 mM），KHK-A（广泛表达，低亲和力，高Km ~6-10 mM）
 **4. 动力学与调控**: 
    - 反应机制: 磷酸转移反应，将ATP的磷酸基团转移到果糖的C1位
    - 速率方程: v = Vmax[Fructose][ATP] / (Km(Fructose)[ATP] + Km(ATP)[Fructose] + [Fructose][ATP])
    - 动力学参数: 
-     * Km(Fructose) ~0.5-1.0 mM
+     * Km(Fructose) 取决于同工酶：KHK-C ~0.5 mM；KHK-A ~6-10 mM
      * Km(ATP) ~0.1-0.5 mM
      * Vmax ~50-100 μmol/min/mg protein
    - 抑制类型: 无强变构调控
@@ -220,10 +217,10 @@
    - 抑制剂: 无强抑制剂
    - 膜定位: 胞浆 (Cytosol)
 **5. 能量与热力学**: ATP消耗: -1, ΔG°' ≈ -15.9 kJ/mol (不可逆)
-**6. 生理意义**: 果糖代谢的第一步，将果糖磷酸化为果糖-1-磷酸
+**6. 生理意义**: 果糖代谢的第一步，将果糖磷酸化为果糖-1-磷酸；肝脏高表达KHK-C以高效代谢血液中的果糖；在病理条件下存在KHK-C → KHK-A表达转换
 **7. 病理结局**: 
-   - KHK 缺陷: 遗传性果糖不耐受症 (HFI)，果糖-1-磷酸堆积
-   - KHK 过表达: 可能导致ATP消耗过多，增加脂肪肝风险
+   - KHK 缺陷: 原发性果糖尿症（通常良性）
+   - 遗传性果糖不耐受症 (HFI): 由 ALDOB 缺乏导致，F-1-P 堆积
 
 ##### 步骤 ID: GLY-17
 **1. 反应名称**: 醛缩酶B (Aldolase B)
@@ -270,7 +267,7 @@
 ##### 步骤 ID: GLY-19
 **1. 反应名称**: 半乳糖转运蛋白 (Galactose Transporter)
 **2. 化学方程式**: Galactose(blood) ⇌ Galactose(cytosol)
-**3. 核心酶信息**: GLUT2 (SLC2A2), 同时转运葡萄糖和半乳糖，基因型: SLC2A2
+**3. 核心酶信息**: GLUT2 (SLC2A2)，肝脏双向转运葡萄糖/半乳糖；补充：肠上皮SGLT1 (SLC5A1) 参与半乳糖与Na+共转运，负责肠腔吸收
 **4. 动力学与调控**: 
    - 反应机制: 被动易化扩散，通过构象变化机制转运半乳糖
    - 速率方程: v = (Vmax_forward[Galactose]blood - Vmax_backward[Galactose]cytosol) / (1 + [Galactose]blood/Km_forward + [Galactose]cytosol/Km_backward)
@@ -285,7 +282,7 @@
 **5. 能量与热力学**: ΔG°' ≈ 0 kJ/mol (可逆)
 **6. 生理意义**: 肝脏摄取半乳糖进行代谢，是半乳糖代谢的主要场所
 **7. 病理结局**: 
-   - GLUT2 缺陷: 半乳糖吸收和代谢障碍
+   - GLUT2 缺陷: 半乳糖吸收和代谢障碍，Fanconi-Bickel 综合征（糖原累积病 XI 型）
 
 ##### 步骤 ID: GLY-20
 **1. 反应名称**: 半乳糖激酶 (Galactokinase)
@@ -1020,16 +1017,16 @@
 **5. 能量与热力学**: ΔG°' ≈ -1.3 kJ/mol (可逆)
 
 ##### 步骤 ID: PPP-09
-**1. 反应名称**: 转酮醇酶辅因子再生 (Transketolase Cofactor Regeneration)
-**2. 化学方程式**: 1.0 TPP (失活) + 1.0 Mg2+ + 1.0 ATP → 1.0 TPP (活性) + 1.0 ADP + 1.0 Pi
-**3. 核心酶信息**: 硫胺素焦磷酸激酶 (Thiamine Pyrophosphokinase), EC 2.7.6.2，基因型: TPK1
+**1. 反应名称**: TPP 从头合成 (Thiamine Pyrophosphokinase Reaction)
+**2. 化学方程式**: 1.0 Thiamine (维生素B1) + 1.0 ATP → 1.0 TPP (硫胺素焦磷酸) + 1.0 AMP
+**3. 核心酶信息**: 硫胺素焦磷酸激酶 (TPK1), EC 2.7.6.2，基因型: TPK1
 **4. 动力学与调控**: 
    - Km(Thiamine) ~0.01-0.05 mM
    - 激活剂: Mg2+, ATP
    - 抑制剂: 硫胺素类似物 (如 oxythiamine)
    - 膜定位: 胞浆 (Cytosol)
 **5. 能量与热力学**: ATP 消耗: -1, ΔG°' ≈ -30 kJ/mol (不可逆)
-**6. 生理意义**: 再生转酮醇酶必需的 TPP 辅因子，维持 PPP 氧化分支功能
+**6. 生理意义**: 从头合成转酮醇酶必需的 TPP 辅因子，维持 PPP 氧化分支功能
 **7. 病理结局**: 
    - 维生素 B1 缺乏: TPP 合成不足 → 转酮醇酶活性下降 → PPP 受阻 → NADPH 生成减少 → 氧化应激
    - 硫胺素缺乏症: 脚气病，Wernicke-Korsakoff 综合征
@@ -1050,16 +1047,16 @@
    - NADPH 耗尽: 无法再生 GSH → 细胞氧化损伤 → 凋亡
 
 ##### 步骤 ID: PPP-11
-**1. 反应名称**: 核糖-5-磷酸激酶 (Ribose-5-Phosphate Kinase)
-**2. 化学方程式**: 1.0 Ribose-5-Phosphate + 1.0 ATP → 1.0 Ribose-1,5-Bisphosphate + 1.0 ADP
-**3. 核心酶信息**: 核糖-5-磷酸激酶 (Ribose-5-Phosphate Kinase), EC 2.7.1.16，基因型: PRPS1, PRPS2
+**1. 反应名称**: PRPP 合成 (PRPP Synthetase)
+**2. 化学方程式**: 1.0 Ribose-5-Phosphate + 1.0 ATP → 1.0 PRPP (5-磷酸核糖-1-焦磷酸) + 1.0 AMP
+**3. 核心酶信息**: 磷酸核糖焦磷酸合成酶 (PRPP Synthetase), EC 2.7.6.1，基因型: PRPS1, PRPS2
 **4. 动力学与调控**: 
    - Km(Ribose-5-Phosphate) ~0.05-0.1 mM
    - 激活剂: Mg2+, Pi
    - 抑制剂: ADP, GDP (产物抑制)
    - 膜定位: 胞浆 (Cytosol)
 **5. 能量与热力学**: ATP 消耗: -1, ΔG°' ≈ -30 kJ/mol (不可逆)
-**6. 生理意义**: 为核苷酸合成提供 PRPP (5-磷酸核糖-1-焦磷酸)，连接 PPP 和核酸合成
+**6. 生理意义**: 生成 PRPP，作为嘌呤/嘧啶从头合成的关键前体，连接 PPP 和核酸合成
 **7. 病理结局**: 
    - PRPS1 过表达: Lesch-Nyhan 综合征，痛风，神经发育异常
    - PRPS1 缺陷: 免疫缺陷，生长迟缓
@@ -1069,16 +1066,16 @@
 #### 脂肪酸转运与摄取 (Fatty Acid Transport and Uptake)
 
 ##### 步骤 ID: LIP-11
-**1. 反应名称**: 长链脂肪酸摄取 (Long-Chain Fatty Acid Uptake)
-**2. 化学方程式**: Fatty Acid(blood) + ATP → Fatty Acid(cytosol) + AMP + PPi
-**3. 核心酶信息**: CD36 (Fatty Acid Translocase) / FATP (Fatty Acid Transport Protein) 家族，基因型: CD36, SLC27A1-6
+**1. 反应名称**: 长链脂肪酸跨膜转运 (Long-Chain Fatty Acid Transmembrane Transport)
+**2. 化学方程式**: Fatty Acid(blood) ⇌ Fatty Acid(cytosol)
+**3. 核心酶信息**: CD36 / FATP 家族 / FABP 协助，基因型: CD36, SLC27A1-6
 **4. 动力学与调控**: 
    - Km(Fatty Acid) ~0.1-0.5 mM
-   - 转运机制: 主动转运，消耗 ATP
-   - 调控: 受胰岛素转位调控: 餐后胰岛素↑ → CD36/FATP膜表达↑ → 脂肪酸摄取↑
+   - 转运机制: 被动/促进扩散 + 蛋白协助，不直接消耗ATP
+   - 调控: 胰岛素促进CD36/FATP膜转位表达
    - 膜定位: 基底膜 (Basolateral membrane)
-**5. 能量与热力学**: ATP 消耗: -1 (用于脂肪酸激活), ΔG°' ≈ -30 kJ/mol
-**6. 生理意义**: 胰岛素敏感的脂肪酸摄取机制，餐后优先储存脂肪
+**5. 能量与热力学**: ΔG°' ≈ 0 kJ/mol (可逆)
+**6. 生理意义**: 介导脂肪酸入胞；细胞内后续由Acyl-CoA synthetase活化（ATP→AMP+PPi）
 **7. 病理结局**: 
    - CD36 过表达: 脂肪酸摄取过多 → 脂质堆积 → 脂肪肝
    - CD36 缺陷: 脂肪酸摄取减少 → 能量代谢异常
@@ -2393,12 +2390,12 @@
 #### 脂肪酸摄取 (Fatty Acid Uptake)
 
 ##### 步骤 ID: TRANS-02
-**1. 反应名称**: 长链脂肪酸摄取 (Long-Chain Fatty Acid Uptake)
-**2. 化学方程式**: Fatty Acid(blood) + ATP → Fatty Acid(cytosol) + AMP + PPi
-**3. 核心酶信息**: CD36 (Fatty Acid Translocase) / FATP (Fatty Acid Transport Protein) 家族
-**4. 动力学与调控**: 受胰岛素转位调控: 餐后胰岛素↑ → CD36/FATP膜表达↑ → 脂肪酸摄取↑
-**5. 能量与热力学**: ATP消耗: -1 (用于脂肪酸激活), ΔG°' ≈ -30 kJ/mol
-**6. 生理意义**: 胰岛素敏感的脂肪酸摄取机制, 餐后优先储存脂肪
+**1. 反应名称**: 长链脂肪酸跨膜转运 (Long-Chain Fatty Acid Transmembrane Transport)
+**2. 化学方程式**: Fatty Acid(blood) ⇌ Fatty Acid(cytosol)
+**3. 核心酶信息**: CD36 / FATP 家族 / FABP 协助
+**4. 动力学与调控**: 胰岛素促进CD36/FATP膜表达，增强转运
+**5. 能量与热力学**: ΔG°' ≈ 0 kJ/mol (可逆)
+**6. 生理意义**: 转运本身不消耗ATP；脂肪酸活化由Acyl-CoA synthetase执行（ATP→AMP+PPi）
 
 #### 线粒体穿梭系统 (Mitochondrial Shuttles)
 
@@ -2420,11 +2417,11 @@
    - 线粒体膜转运: Citrate(mito) → Citrate(cyto)
    - 胞浆: Citrate + ATP + CoA-SH → Acetyl-CoA + Oxaloacetate + ADP + Pi
    - 胞浆: Oxaloacetate + NADH + H+ → Malate + NAD+
-   - 胞浆: Malate + NAD+ → Pyruvate + CO2 + NADH
+   - 胞浆: Malate + NADP+ → Pyruvate + CO2 + NADPH
    - 线粒体膜转运: Pyruvate(cyto) → Pyruvate(mito)
 **3. 核心酶信息**: 柠檬酸合酶 (CS), ATP-柠檬酸裂解酶 (ACL), 苹果酸脱氢酶 (MDH), 苹果酸酶 (ME), 柠檬酸转运体, 丙酮酸转运体
 **4. 动力学与调控**: 能量状态调控: 高ATP/柠檬酸 → 脂肪酸合成激活; 低ATP → TCA循环优先
-**5. 能量与热力学**: ATP消耗: -1 (胞浆裂解柠檬酸), NADPH生成: +1 (苹果酸酶反应)
+**5. 能量与热力学**: ATP消耗: -1 (胞浆裂解柠檬酸), NADPH生成: +1 (苹果酸酶反应，NADP+为辅因子)
 **6. 生理意义**: 将线粒体Acetyl-CoA运出胞浆用于脂肪酸合成, 同时生成NADPH供脂质合成使用
 
 ### 电子传递链微观拆解 (Micro-ETC)
